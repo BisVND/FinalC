@@ -2,13 +2,13 @@
 #include<cmath>
 
 using namespace std;
-double Interest(double IntRate, double outstanding, double period, double prin, double irpd, double month, double year, int i){
+double Interest(double IntRate, double outstanding, double principle, double frequency, double month, int year, int i){
 
     int IntPmt;
 
-        IntPmt = IntRate*outstanding/irpd/100;
-        cout << "Payment " << i + 1 << " occured in " << month << "/" << year << " has interest of " << IntPmt
-         << " and total installment is " << IntPmt + prin<< endl;
+        IntPmt = IntRate*outstanding/frequency/100;
+        cout << "Payment " << i + 1 << " occures in " << month << "/" << year << " has interest of " << IntPmt
+         << " and total installment is " << IntPmt + principle<< endl;
 
     return IntPmt;
 }
@@ -29,7 +29,7 @@ double boxMuller(double mean, double std) {
 
 main () {
     int i, year, type;
-    double IntRate, outstanding, period, irpd, prin, IntPmt, fltmean, fltstd, margin, month;
+    double IntRate, outstanding, period, freq, prin, IntPmt, fltmean, fltstd, margin, month;
 
     cout << "Please provide: " << endl;
 
@@ -44,9 +44,9 @@ main () {
     } while (period <= 0);
 
     do {
-        cout << "Payment frequency [1 (annually), 2 (semiannually), 4 (quarterly), 12 (monthhly)!]:" << endl;
-        cin >> irpd;
-    } while (irpd <= 0 || irpd > 12);
+        cout << "Payment freq [1 (annually), 2 (semiannually), 4 (quarterly), 12 (monthhly)!]:" << endl;
+        cin >> freq;
+    } while (freq != 0 && freq != 2 && freq != 4 && freq != 12);
 
     do {
         cout << "Starting month [should be positive!]:" << endl;
@@ -68,19 +68,6 @@ main () {
             cout << "Yearly interest rate [should be positive and in percentage (5%)!]:" << endl;
             cin >> IntRate;
         } while (IntRate <= 0);
-
-        prin = outstanding/period;
-        cout << "Principle payment each period is " << prin << endl;
-
-        for (i = 0; i < period; ++i) {
-            IntPmt = Interest(IntRate, outstanding, period, prin, irpd, month, year, i);
-            outstanding = outstanding - prin;
-
-            if (month + (12 / irpd) > 12) {
-                month = month + (12 / irpd) - 12;
-                year = year + 1;
-            } else { month = month + (12 / irpd); }
-        }
     } else {
         do {
             cout << "Floating rate mean [should be positive and in percentage (5%)!]:" << endl;
@@ -96,24 +83,27 @@ main () {
             cout << "Margin [should be positive and in percentage (5%)!]:" << endl;
             cin >> margin;
         } while (margin <= 0);
+    }
 
-        prin = outstanding/period;
-        cout << "Principle payment each period is " << prin << endl;
+    prin = outstanding/period;
+    cout << "Principle payment each period is " << prin << endl;
 
         for (i = 0; i < period; ++i) {
-            IntRate = boxMuller(fltmean, fltstd)+ margin;
+            if (type == 0){
+                IntRate = boxMuller(fltmean, fltstd)+ margin;
+                cout << "Payment " << i + 1 << " has interest rate of " << IntRate << endl;
+            }
+            IntPmt = Interest(IntRate, outstanding, prin, freq, month, year, i);
 
-            cout << "Payment " << i + 1 << " has interest rate of " << IntRate << endl;
-
-            IntPmt = Interest(IntRate, outstanding, period, prin, irpd, month, year, i);
             outstanding = outstanding - prin;
 
-            if (month + (12 / irpd) > 12) {
-                month = month + (12 / irpd) - 12;
+            if (month + (12 / freq) > 12) {
+                month = month + (12 / freq) - 12;
                 year = year + 1;
-            } else { month = month + (12 / irpd); }
+            } else {
+                month = month + (12 / freq);
+            }
         }
-    }
+
     return 0;
 }
-
