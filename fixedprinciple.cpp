@@ -65,22 +65,22 @@ main () {
 
     if (type == 1) {
         do {
-            cout << "Yearly interest rate [should be positive and in percentage (5%)!]:" << endl;
+            cout << "Yearly interest rate [should be positive and in percentage!]:" << endl;
             cin >> IntRate;
         } while (IntRate <= 0);
     } else {
         do {
-            cout << "Floating rate mean [should be positive and in percentage (5%)!]:" << endl;
+            cout << "Floating rate mean [should be positive and in percentage!]:" << endl;
             cin >> fltmean;
         } while (IntRate <= 0);
 
         do {
-            cout << "Floating rate standard deviation [should be positive and in percentage (5%)!]:" << endl;
+            cout << "Floating rate standard deviation [should be positive and in percentage!]:" << endl;
             cin >> fltstd;
         } while (IntRate <= 0);
 
         do {
-            cout << "Margin [should be positive and in percentage (5%)!]:" << endl;
+            cout << "Margin [should be positive and in percentage!]:" << endl;
             cin >> margin;
         } while (margin <= 0);
     }
