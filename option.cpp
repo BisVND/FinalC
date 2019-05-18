@@ -3,6 +3,7 @@
 using namespace std;
 
 int pd(){
+    
     int opt, tn;
     int k[5] = {1, 2, 3, 6, 12};
     cout << "1: Monthly (every month)" << endl
@@ -12,6 +13,7 @@ int pd(){
          << "5: Annually (yearly)" << endl
          << "Please pick the payment period: ";
     cin >> opt;
+    
     cout << "How many year the payment is? ";
     cin >> tn;
     return tn*k[opt-1];
@@ -19,7 +21,6 @@ int pd(){
 
 int opt3_1(irPd){
     double PV, irPd;
-
 
 }
 
@@ -29,11 +30,12 @@ int opt3_1(irPd){
 
 
 int main() {
+    
     int opt, irPd;
     cout << "1: Fixed rate" << endl
          << "2: Floating rate" << endl
          << "3: Fixed rate, fixed instalments" << endl
-         << "What payment method do you want to apply? ";
+         << "Which payment method do you want to apply? ";
     cin >> opt;
 
     if(opt == 3)
@@ -61,4 +63,5 @@ int main() {
     {
         irPd = optpd();
     }
+    
 }
