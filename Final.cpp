@@ -2,6 +2,7 @@
 Functions:
  - boxMuller: for normal distribution
  - biSearch: Binary search
+ - date: month and year of payment (yyyymm)
 Main:
  - Option
  - Input
