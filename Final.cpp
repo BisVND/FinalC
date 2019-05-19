@@ -46,20 +46,20 @@ double biSearch(double PV , int period , double PMT , double freq) {
 }
 
 int date(int month, int year, int freq, int i) {
-        month = month + i * freq;
-        if (month > 12) {
-            year += floor(month / 12) ;
-            month = month % 12;
-        }
+    month = month + i * 12/freq;
+    if (month > 12) {
+        year += floor(month / 12) ;
+        month = month % 12;
+    }
     return month + year * 100;
 }
 
 /*============================================MAIN============================================*/
 main() {
-    int opt , subOpt , sub , i , month , year , 
-        period = 0;
+    int opt , subOpt , sub , i , month , year , montht , yeart,
+            period = 0;
     double intPmt , intRate , PV , PMT , freq , prin , fltMean , fltStd , margin ,
-           accumPrin = 0;
+            accumPrin = 0;
     ofstream csvFile;
     char separator = ';';
 
@@ -141,10 +141,12 @@ main() {
     do {
         cout << "Starting month [should be positive!]:" << endl;
         cin >> month;
+        montht = month;
     } while (month <= 0);
     do {
         cout << "Starting year [should be positive!]:" << endl;
         cin >> year;
+        yeart = year;
     } while (year <= 0);
 
     //************************************CALCULATION************************************//
@@ -166,12 +168,12 @@ main() {
                 intPmt = intRate * (PV - prin * i);
                 cout << "Payment " << i + 1 << " occures in " << month << "/" << year << " has interest of " << intPmt
                      << " and total installment is " << intPmt + prin << endl;
-              if (month + (12 / freq) > 12) {
-              month = month + (12 / freq) - 12;
-              year = year + 1;
-              } else {
-            month = month + (12 / freq);
-               }
+                if (month + (12 / freq) > 12) {
+                    month = month + (12 / freq) - 12;
+                    year = year + 1;
+                } else {
+                    month = month + (12 / freq);
+                }
             }
         }
     }
@@ -207,7 +209,7 @@ main() {
                     << separator << "closing balance\n";
             for (i = 0 ; i < period ; i++) {
                 intPmt = intRate * (PV - prin * i);
-                csvFile << i + 1 << separator << date(month , year , freq , i) << separator << PV - prin * i
+                csvFile << i + 1 << separator << date(montht , yeart , freq , i) << separator << PV - prin * i
                         << separator << prin << separator << intRate / freq << separator << intPmt << separator
                         << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
             }
@@ -219,7 +221,7 @@ main() {
             for (i = 0 ; i < period ; i++) {
                 intPmt = fltRate[i] * (PV - prin * i);
 
-                csvFile << i + 1 << separator << date(month , year , freq , i) << separator << PV - prin * i
+                csvFile << i + 1 << separator << date(montht , yeart , freq , i) << separator << PV - prin * i
                         << separator << prin << separator << fltRate[i] << separator << fltRate[i] / freq << separator
                         << intPmt << separator << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
             }
@@ -232,7 +234,7 @@ main() {
                 accumPrin += prin;
                 intPmt = intRate / freq * (PV - accumPrin);
                 prin = PMT - intPmt;
-                csvFile << i + 1 << separator << date(month , year , freq , i) << separator << PV - accumPrin
+                csvFile << i + 1 << separator << date(montht , yeart , freq , i) << separator << PV - accumPrin
                         << separator << prin << separator << intRate / freq << separator << intPmt << separator << PMT
                         << separator << PV - accumPrin - prin << "\n";
             }
