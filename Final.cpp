@@ -15,6 +15,7 @@ Main:
 
 using namespace std;
 
+/*============================================FUNCTIONS============================================*/
 double boxMuller(double mean , double std) {
     double x , y , s , z , p;
     do {
@@ -43,7 +44,20 @@ double biSearch(double PV , int period , double PMT , double freq) {
     return intRate;
 }
 
+int date(int month, int year, int freq, int period) {
+    int i;
+    for (i = 0 ; i < period ; i++) {
+        if (month + (12 / freq) > 12) {
+            month = month + (12 / freq) - 12;
+            year = year + 1;
+        } else {
+            month = month + (12 / freq);
+        }
+    }
+    return month + year * 100;
+}
 
+/*============================================MAIN============================================*/
 main() {
     int opt , subOpt , sub , i , month , year , 
         period = 0;
@@ -188,12 +202,6 @@ main() {
 
     if (sub == 1) {
         csvFile.open("output.csv");
-        if (month + (12 / freq) > 12) {
-            month = month + (12 / freq) - 12;
-            year = year + 1;
-        } else {
-            month = month + (12 / freq);
-        }
 
         if (opt == 1) {
             prin = PV / period;
@@ -202,9 +210,9 @@ main() {
                     << separator << "closing balance\n";
             for (i = 0 ; i < period ; i++) {
                 intPmt = intRate * (PV - prin * i);
-                csvFile << i + 1 << separator << month << "/" << year << separator << PV - prin * i << separator << prin
-                        << separator << intRate / freq << separator << intPmt << separator << prin + intPmt
-                        << separator << PV - prin * (i + 1) << "\n";
+                csvFile << i + 1 << separator << date(month , year , freq , period) << separator << PV - prin * i
+                        << separator << prin << separator << intRate / freq << separator << intPmt << separator
+                        << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
             }
         }
         if (opt == 2) {
@@ -214,9 +222,9 @@ main() {
             for (i = 0 ; i < period ; i++) {
                 intPmt = fltRate[i] * (PV - prin * i);
 
-                csvFile << i + 1 << separator << month << "/" << year << separator << PV - prin * i << separator
-                        << prin << separator << fltRate[i] << separator << fltRate[i] / freq << separator << intPmt
-                        << separator << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
+                csvFile << i + 1 << separator << date(month , year , freq , period) << separator << PV - prin * i
+                        << separator << prin << separator << fltRate[i] << separator << fltRate[i] / freq << separator
+                        << intPmt << separator << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
             }
         }
         if (opt == 3) {
@@ -227,9 +235,9 @@ main() {
                 accumPrin += prin;
                 intPmt = intRate / freq * (PV - accumPrin);
                 prin = PMT - intPmt;
-                csvFile << i + 1 << separator << month << "/" << year << separator << PV - accumPrin << separator
-                        << prin << separator << intRate / freq << separator << intPmt << separator << PMT << separator
-                        << PV - accumPrin - prin << "\n";
+                csvFile << i + 1 << separator << date(month , year , freq , period) << separator << PV - accumPrin
+                        << separator << prin << separator << intRate / freq << separator << intPmt << separator << PMT
+                        << separator << PV - accumPrin - prin << "\n";
             }
         }
         csvFile.close();
