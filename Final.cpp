@@ -30,7 +30,7 @@ double boxMuller(double mean, double std) {
     return p;
 }
 
-double biSearch(double PV, double period, double PMT, double freq) {
+double biSearch(double PV, int period, double PMT, double freq) {
     double ubound = 1 , lbound = 0 , intRate , PMTtemp;
     do {
         intRate = lbound + (ubound - lbound) / 2;
@@ -41,11 +41,11 @@ double biSearch(double PV, double period, double PMT, double freq) {
         } else {
             lbound = intRate;
         }
-    } while (abs(ubound - lbound) > pow(10 , -10));
+    } while (abs(ubound - lbound) > 0.0000000001);
     return intRate;
 }
 
-double interest(double intRate, double PV, double period, double freq, double month, int year, int i) {
+double interest(double intRate, double PV, int period, double freq, double month, int year, int i) {
     double intPmt , prin;
 
     intPmt = intRate * PV;
@@ -55,9 +55,48 @@ double interest(double intRate, double PV, double period, double freq, double mo
     return intPmt;
 }
 
+void saveToFile(int opt, int period, int month , int year, double freq, double PV, double intRate, double intPmt, double PMT) {
+    int i;
+    double prin , accumPrin;
+    char separator = ';';
+
+    ofstream csvFile;
+    csvFile.open("output.csv");
+
+    if (opt == 1) {
+        prin = PV / period;
+        csvFile << "Seq" << separator << "Period" << separator << "Opening Balance" << separator << "Principal"
+                << separator << "periodic interest rate" << separator << "interest" << separator << "instalment"
+                << separator << "closing balance\n";
+        for (i = 0 ; i < period ; i++) {
+            intPmt = intRate * (PV - prin * i);
+            csvFile << i + 1 << separator << month << "/" << year << separator << PV - prin * i << separator << prin
+                    << separator << intRate / freq << separator << intPmt << separator << prin + intPmt
+                    << separator << PV - prin * (i + 1) << "\n";
+        }
+    }
+    if (opt == 3) {
+        prin = 0;
+        csvFile << "Seq" << separator << "Period" << separator << "Opening Balance" << separator << "Principal"
+                << separator << "periodic interest rate" << separator << "interest" << separator << "instalment"
+                << separator << "closing balance\n";
+        for (i = 0 ; i < period ; i++) {
+            accumPrin += prin;
+            intPmt = intRate * (PV - accumPrin);
+            prin = PMT - intPmt;
+            csvFile << i + 1 << separator << month << "/" << year << separator << PV - accumPrin << separator << prin
+                    << separator << intRate / freq << separator << intPmt << separator << PMT << separator
+                    << PV - accumPrin - prin << "\n";
+        }
+    }
+}
+
 main () {
-    int opt , subOpt , i , month , year , temp = 0;
-    double intRate , PV , PMT , period , freq , prin , intPmt , fltMean , fltStd , margin;
+    int opt , subOpt , sub , i , month , year , period;
+    double intPmt , intRate , PV , PMT , freq , prin , fltMean , fltStd , margin;
+    ofstream csvFile;
+    csvFile.open("output.csv");
+    char separator = ';';
 
     //************************************OPTION************************************//
     do {
@@ -109,8 +148,8 @@ main () {
                 cout << "Do you mean the interest is " << intRate * 100 << " ?" << endl
                      << "1. Yes" << endl
                      << "2. No" << endl;
-                cin >> temp;
-                if (temp == 1) {
+                cin >> sub;
+                if (sub == 1) {
                     intRate = intRate * 100;
                 }
             }
@@ -144,6 +183,7 @@ main () {
     } while (year <= 0);
 
     //************************************CALCULATION************************************//
+    double fltRate[period];
     intRate = intRate / 100 / freq;
 
     if (opt == 1 || opt == 2 || subOpt == 1) {
@@ -152,22 +192,15 @@ main () {
             cout << "Payment is " << PMT << endl;
         } else {
             prin = PV / period;
-
-            cout << "Principle payment each period is " << prin << endl;
             for (i = 0 ; i < period ; ++i) {
                 if (opt == 2) {
-                    intRate = boxMuller(fltMean , fltStd) + margin;
+                    fltRate[i] = boxMuller(fltMean , fltStd) + margin;
+                    intRate = fltRate[i] / 100;
                     cout << "Payment " << i + 1 << " has interest rate of " << intRate << endl;
                 }
-                intPmt = interest(intRate , PV , period , freq , month , year , i);
-                PV = PV - prin;
-
-                if (month + (12 / freq) > 12) {
-                    month = month + (12 / freq) - 12;
-                    year = year + 1;
-                } else {
-                    month = month + (12 / freq);
-                }
+                intPmt = intRate * (PV - prin * i);
+                cout << "Payment " << i + 1 << " occures in " << month << "/" << year << " has interest of " << intPmt
+                     << " and total installment is " << intPmt + prin << endl;
             }
         }
     }
@@ -178,7 +211,7 @@ main () {
     }
 
     if (subOpt == 3) {
-        period = log(1 / (PMT / (PV * intRate) - 1) + 1) / log(1 + intRate); // temp = (1+r)^n
+        period = log(1 / (PMT / (PV * intRate) - 1) + 1) / log(1 + intRate);
         cout << "Total number of payment is " << round(period) << endl;
     }
 
@@ -188,4 +221,36 @@ main () {
     }
 
     //************************************SAVE************************************//
+    cout << "Do you want to save file? " << endl
+         << "1.Yes" << endl
+         << "2.No" << endl;
+
+    cin >> sub;
+    if (sub == 1) {
+        if (month + (12 / freq) > 12) {
+            month = month + (12 / freq) - 12;
+            year = year + 1;
+        } else {
+            month = month + (12 / freq);
+        }
+        if (opt == 2) {
+            csvFile << "Seq" << separator << "Period" << separator << "Opening Balance" << separator << "Principal"
+                    << separator << "floating rate" << separator << "periodic interest rate" << separator
+                    << "interest" << separator << "instalment" << separator << "closing balance\n";
+            for (i = 0 ; i < period ; i++) {
+                intPmt = fltRate[i] * (PV - prin * i);
+
+                csvFile << i + 1 << separator << month << "/" << year << separator << PV - prin * i << separator
+                        << prin << separator << fltRate[i] << separator << fltRate[i] / freq << separator << intPmt
+                        << separator << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
+            }
+        } else {
+            saveToFile(opt , period , month , year , freq , PV , intRate , intPmt , PMT);
+        }
+        csvFile.close();
+        cout << "Files saved!" << endl;
+    } else {
+        cout << "The program end here!";
+        return 0;
+    }
 }
