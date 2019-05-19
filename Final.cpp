@@ -30,19 +30,18 @@ double boxMuller(double mean, double std) {
     return p;
 }
 
-double biSearch(double PV, double period, double PMT) {
-    double ubound = 1 , lbound = 0;
-    double intRate, PMTtemp;
+double biSearch(double PV, double period, double PMT, double freq) {
+    double ubound = 1 , lbound = 0 , intRate , PMTtemp;
     do {
         intRate = lbound + (ubound - lbound) / 2;
-        PMTtemp = intRate * PV * (1 + 1 / (pow(intRate , period) - 1));
+        PMTtemp = intRate / freq * PV * (1 + 1 / (pow(1 + intRate / freq , period) - 1));
 
-        if (PMTtemp < PMT) {
+        if (PMTtemp > PMT) {
             ubound = intRate;
         } else {
             lbound = intRate;
         }
-    } while (abs(ubound - lbound) > 0.0001);
+    } while (abs(ubound - lbound) > pow(10 , -10));
     return intRate;
 }
 
@@ -56,22 +55,9 @@ double interest(double intRate, double PV, double period, double freq, double mo
     return intPmt;
 }
 
-void saveToFile() {
-    char listSeparator=';';
-
-    ofstream csvFile;
-    csvFile.open ("output.csv");
-    csvFile << "col1"<< listSeparator <<"col2"<< listSeparator <<"col3\n";
-    csvFile.close();
-
-    cout << "Files saved!" << endl;
-}
-
-
-
 main () {
-    int opt , subOpt , i , month , year, temp;
-    double intRate , PV , PMT , period , freq , prin , intPmt , fltMean , fltStd , margin ;
+    int opt , subOpt , i , month , year , temp = 0;
+    double intRate , PV , PMT , period , freq , prin , intPmt , fltMean , fltStd , margin;
 
     //************************************OPTION************************************//
     do {
@@ -80,7 +66,7 @@ main () {
              << "3: Fixed rate, fixed instalments" << endl
              << "What payment method do you want to apply? ";
         cin >> opt;
-    } while (opt != 1 && opt != 2 && opt != 3 );
+    } while (opt != 1 && opt != 2 && opt != 3);
 
     if (opt == 3) {
         cout << "Please choose the case: " << endl
@@ -131,7 +117,7 @@ main () {
         } while (intRate <= 0);
     } else if (opt == 2) {
         do {
-            cout << "Margin [should be positive and in percentage!]: "<< endl;
+            cout << "Margin [should be positive and in percentage!]: " << endl;
             cin >> margin;
         } while (margin <= 0);
         do {
@@ -139,13 +125,13 @@ main () {
             cin >> fltMean;
         } while (fltMean <= 0);
         do {
-            cout << "Floating rate standard deviation [should be positive and in percentage!]: "<< endl;
+            cout << "Floating rate standard deviation [should be positive and in percentage!]: " << endl;
             cin >> fltStd;
         } while (fltStd <= 0);
     }
     // input freq, starting year and starting month
     do {
-        cout << "Number of payment made within a year [should be positive and within 12 months!]: "<< endl;
+        cout << "Number of payment within a year [should be positive and within 12 months!]: " << endl;
         cin >> freq;
     } while (freq <= 0 || freq > 12);
     do {
@@ -168,12 +154,12 @@ main () {
             prin = PV / period;
 
             cout << "Principle payment each period is " << prin << endl;
-            for (i = 0; i < period; ++i) {
+            for (i = 0 ; i < period ; ++i) {
                 if (opt == 2) {
-                    intRate = boxMuller(fltMean, fltStd) + margin;
+                    intRate = boxMuller(fltMean , fltStd) + margin;
                     cout << "Payment " << i + 1 << " has interest rate of " << intRate << endl;
                 }
-                intPmt = interest(intRate, PV, period, freq, month, year, i);
+                intPmt = interest(intRate , PV , period , freq , month , year , i);
                 PV = PV - prin;
 
                 if (month + (12 / freq) > 12) {
@@ -192,26 +178,14 @@ main () {
     }
 
     if (subOpt == 3) {
-        temp = 1 / (PMT / (PV * intRate) - 1) + 1;
-        while (temp > (1 + intRate)) {
-            temp /= 1 + intRate;
-            ++period;
-        }
-        cout << "Number of payment is " << period << endl;
+        period = log(1 / (PMT / (PV * intRate) - 1) + 1) / log(1 + intRate); // temp = (1+r)^n
+        cout << "Total number of payment is " << round(period) << endl;
     }
 
     if (subOpt == 4) {
-        intRate = biSearch(PV , period , PMT);
+        intRate = round(biSearch(PV , period , PMT , freq) * 10000) / 100;
         cout << "Interest rate is " << intRate << endl;
     }
 
     //************************************SAVE************************************//
-    saveToFile();
 }
-
-
-//        period = 0;
-//        while (temp > (1+intRate)){
-//            temp /= 1 + intRate;
-//            ++period;
-//        }
