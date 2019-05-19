@@ -45,9 +45,10 @@ double biSearch(double PV , int period , double PMT , double freq) {
 
 
 main() {
-    int opt , subOpt , sub , i , month , year , period;
+    int opt , subOpt , sub , i , month , year , 
+        period = 0;
     double intPmt , intRate , PV , PMT , freq , prin , fltMean , fltStd , margin ,
-            accumPrin = 0;
+           accumPrin = 0;
     ofstream csvFile;
     char separator = ';';
 
