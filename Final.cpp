@@ -150,11 +150,17 @@ main() {
                 if (opt == 2) {
                     fltRate[i] = boxMuller(fltMean , fltStd) + margin;
                     intRate = fltRate[i] / 100;
-                    cout << "Payment " << i + 1 << " has interest rate of " << intRate << endl;
+                    cout << "Payment " << i + 1 << " has interest rate of " << intRate *100 <<" %"<< endl;
                 }
                 intPmt = intRate * (PV - prin * i);
                 cout << "Payment " << i + 1 << " occures in " << month << "/" << year << " has interest of " << intPmt
                      << " and total installment is " << intPmt + prin << endl;
+              if (month + (12 / freq) > 12) {
+              month = month + (12 / freq) - 12;
+              year = year + 1;
+              } else {
+            month = month + (12 / freq);
+               }
             }
         }
     }
@@ -171,7 +177,7 @@ main() {
 
     if (subOpt == 4) {
         intRate = biSearch(PV , period , PMT , freq);
-        cout << "Interest rate is " << round(intRate * 10000) / 100 << endl;
+        cout << "Interest rate is " << round(intRate * 10000) / 100 <<" %"<< endl;
     }
 
     //************************************SAVE************************************//
