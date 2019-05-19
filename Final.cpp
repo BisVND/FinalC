@@ -170,8 +170,8 @@ main() {
     }
 
     if (subOpt == 4) {
-        intRate = round(biSearch(PV , period , PMT , freq) * 10000) / 100;
-        cout << "Interest rate is " << intRate << endl;
+        intRate = biSearch(PV , period , PMT , freq);
+        cout << "Interest rate is " << round(intRate * 10000) / 100 << endl;
     }
 
     //************************************SAVE************************************//
@@ -219,7 +219,7 @@ main() {
                     << separator << "closing balance\n";
             for (i = 0 ; i < period ; i++) {
                 accumPrin += prin;
-                intPmt = intRate * (PV - accumPrin);
+                intPmt = intRate / freq * (PV - accumPrin);
                 prin = PMT - intPmt;
                 csvFile << i + 1 << separator << month << "/" << year << separator << PV - accumPrin << separator
                         << prin << separator << intRate / freq << separator << intPmt << separator << PMT << separator
