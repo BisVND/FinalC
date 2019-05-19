@@ -45,16 +45,12 @@ double biSearch(double PV , int period , double PMT , double freq) {
     return intRate;
 }
 
-int date(int month, int year, int freq, int period) {
-    int i;
-    for (i = 0 ; i < period ; i++) {
-        if (month + (12 / freq) > 12) {
-            month = month + (12 / freq) - 12;
-            year = year + 1;
-        } else {
-            month = month + (12 / freq);
+int date(int month, int year, int freq, int i) {
+        month = month + i * freq;
+        if (month > 12) {
+            year += floor(month / 12) ;
+            month = month % 12;
         }
-    }
     return month + year * 100;
 }
 
@@ -211,7 +207,7 @@ main() {
                     << separator << "closing balance\n";
             for (i = 0 ; i < period ; i++) {
                 intPmt = intRate * (PV - prin * i);
-                csvFile << i + 1 << separator << date(month , year , freq , period) << separator << PV - prin * i
+                csvFile << i + 1 << separator << date(month , year , freq , i) << separator << PV - prin * i
                         << separator << prin << separator << intRate / freq << separator << intPmt << separator
                         << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
             }
@@ -223,7 +219,7 @@ main() {
             for (i = 0 ; i < period ; i++) {
                 intPmt = fltRate[i] * (PV - prin * i);
 
-                csvFile << i + 1 << separator << date(month , year , freq , period) << separator << PV - prin * i
+                csvFile << i + 1 << separator << date(month , year , freq , i) << separator << PV - prin * i
                         << separator << prin << separator << fltRate[i] << separator << fltRate[i] / freq << separator
                         << intPmt << separator << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
             }
@@ -236,7 +232,7 @@ main() {
                 accumPrin += prin;
                 intPmt = intRate / freq * (PV - accumPrin);
                 prin = PMT - intPmt;
-                csvFile << i + 1 << separator << date(month , year , freq , period) << separator << PV - accumPrin
+                csvFile << i + 1 << separator << date(month , year , freq , i) << separator << PV - accumPrin
                         << separator << prin << separator << intRate / freq << separator << intPmt << separator << PMT
                         << separator << PV - accumPrin - prin << "\n";
             }
