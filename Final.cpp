@@ -64,7 +64,7 @@ main() {
         cout << "Please choose the case: " << endl
              << "1: Want to compute payment" << endl
              << "2: Want to compute Loan amount" << endl
-             << "3: Want to compute number of years" << endl
+             << "3: Want to compute number of payments" << endl
              << "4: Want to compute interest rate " << endl;
         cin >> subOpt;
     }
