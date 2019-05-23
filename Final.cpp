@@ -45,24 +45,23 @@ double biSearch(double PV , int period , double PMT , double freq) {
     return intRate;
 }
 
-int date(int month, int year, int freq, int i) {
-    month = month + i * 12/freq;
+string date(int month, int year, int freq, int i) {
+    month = month + i * 12 / freq;
     if (month > 12) {
-        year += floor(month / 12) ;
+        year += floor(month / 12);
         month = month % 12;
     }
-    return month + year * 100;
+    string date = to_string(month) + "/" + to_string(year);
+    return date;
 }
 
 /*============================================MAIN============================================*/
 main() {
-    int opt , subOpt , sub , i , month , year , montht , yeart,
-            period = 0;
-    double intPmt , intRate , PV , PMT , freq , prin , fltMean , fltStd , margin ,
-            accumPrin = 0;
-    ofstream csvFile;
-    char separator = ';';
-
+    int opt , subOpt , sub , i , month , year ,
+        period = 0;
+    double intPmt , intRate , PV , PMT , freq , prin , fltMean , fltStd , margin , outStanding ,
+           accumPrin = 0;
+ 
     //************************************OPTION************************************//
     do {
         cout << "1: Fixed rate" << endl
@@ -141,12 +140,10 @@ main() {
     do {
         cout << "Starting month [should be positive!]:" << endl;
         cin >> month;
-        montht = month;
     } while (month <= 0);
     do {
         cout << "Starting year [should be positive!]:" << endl;
         cin >> year;
-        yeart = year;
     } while (year <= 0);
 
     //************************************CALCULATION************************************//
@@ -163,17 +160,13 @@ main() {
                 if (opt == 2) {
                     fltRate[i] = boxMuller(fltMean , fltStd) + margin;
                     intRate = fltRate[i] / 100;
-                    cout << "Payment " << i + 1 << " has interest rate of " << intRate *100 <<" %"<< endl;
+                    cout << "Payment " << i + 1 << " has interest rate of " << intRate * 100 << " %" << endl;
                 }
                 intPmt = intRate * (PV - prin * i);
-                cout << "Payment " << i + 1 << " occures in " << month << "/" << year << " has interest of " << intPmt
+                cout << "Payment " << i + 1
+                     << " occurs in " << date(month , year , freq , i)
+                     << " has interest of " << intPmt
                      << " and total installment is " << intPmt + prin << endl;
-                if (month + (12 / freq) > 12) {
-                    month = month + (12 / freq) - 12;
-                    year = year + 1;
-                } else {
-                    month = month + (12 / freq);
-                }
             }
         }
     }
@@ -190,7 +183,8 @@ main() {
 
     if (subOpt == 4) {
         intRate = biSearch(PV , period , PMT , freq);
-        cout << "Interest rate is " << round(intRate * 10000) / 100 <<" %"<< endl;
+        cout << "Interest rate is " << round(intRate * 10000) / 100 << " %" << endl;
+        intRate = intRate / freq;
     }
 
     //************************************SAVE************************************//
@@ -200,43 +194,92 @@ main() {
     cin >> sub;
 
     if (sub == 1) {
+        ofstream csvFile;
+        char separator = ';';
         csvFile.open("output.csv");
 
         if (opt == 1) {
             prin = PV / period;
-            csvFile << "Seq" << separator << "Period" << separator << "Opening Balance" << separator << "Principal"
-                    << separator << "periodic interest rate" << separator << "interest" << separator << "instalment"
-                    << separator << "closing balance\n";
+            csvFile << "Seq" << separator
+                    << "Period" << separator
+                    << "Opening Balance" << separator
+                    << "Principal" << separator
+                    << "Periodic Interest Rate" << separator
+                    << "Interest" << separator
+                    << "Instalment" << separator
+                    << "Closing Balance\n";
             for (i = 0 ; i < period ; i++) {
                 intPmt = intRate * (PV - prin * i);
-                csvFile << i + 1 << separator << date(montht , yeart , freq , i) << separator << PV - prin * i
-                        << separator << prin << separator << intRate / freq << separator << intPmt << separator
-                        << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
+                outStanding = PV - prin * (i + 1);
+                if (i + 1 == period) {
+                    outStanding = 0;
+                    prin = PV - prin * i;
+                }
+                csvFile << i + 1 << separator
+                        << date(month , year , freq , i) << separator
+                        << PV - prin * i << separator
+                        << prin << separator
+                        << intRate << separator
+                        << intPmt << separator
+                        << prin + intPmt << separator
+                        << outStanding << "\n";
             }
         }
         if (opt == 2) {
-            csvFile << "Seq" << separator << "Period" << separator << "Opening Balance" << separator << "Principal"
-                    << separator << "floating rate" << separator << "periodic interest rate" << separator
-                    << "interest" << separator << "instalment" << separator << "closing balance\n";
+            csvFile << "Seq" << separator
+                    << "Period" << separator
+                    << "Opening Balance" << separator
+                    << "Principal" << separator
+                    << "Floating Rate" << separator
+                    << "Periodic Interest Rate" << separator
+                    << "Interest" << separator
+                    << "Instalment" << separator
+                    << "Closing Balance\n";
             for (i = 0 ; i < period ; i++) {
                 intPmt = fltRate[i] * (PV - prin * i);
-
-                csvFile << i + 1 << separator << date(montht , yeart , freq , i) << separator << PV - prin * i
-                        << separator << prin << separator << fltRate[i] << separator << fltRate[i] / freq << separator
-                        << intPmt << separator << prin + intPmt << separator << PV - prin * (i + 1) << "\n";
+                outStanding = PV - prin * (i + 1);
+                if (i + 1 == period) {
+                    outStanding = 0;
+                    prin = PV - prin * i;
+                }
+                csvFile << i + 1 << separator
+                        << date(month , year , freq , i) << separator
+                        << PV - prin * i << separator
+                        << prin << separator
+                        << fltRate[i] << separator
+                        << fltRate[i] / freq << separator
+                        << intPmt << separator
+                        << prin + intPmt << separator
+                        << outStanding << "\n";
             }
         }
         if (opt == 3) {
-            csvFile << "Seq" << separator << "Period" << separator << "Opening Balance" << separator << "Principal"
-                    << separator << "periodic interest rate" << separator << "interest" << separator << "instalment"
-                    << separator << "closing balance\n";
+            csvFile << "Seq" << separator
+                    << "Period" << separator
+                    << "Opening Balance" << separator
+                    << "Principal" << separator
+                    << "Periodic Interest Rate" << separator
+                    << "Interest" << separator
+                    << "Instalment" << separator
+                    << "Closing Balance\n";
             for (i = 0 ; i < period ; i++) {
                 accumPrin += prin;
-                intPmt = intRate / freq * (PV - accumPrin);
+                intPmt = intRate * (PV - accumPrin);
                 prin = PMT - intPmt;
-                csvFile << i + 1 << separator << date(montht , yeart , freq , i) << separator << PV - accumPrin
-                        << separator << prin << separator << intRate / freq << separator << intPmt << separator << PMT
-                        << separator << PV - accumPrin - prin << "\n";
+                outStanding = PV - accumPrin - prin;
+                if (i + 1 == period) {
+                    outStanding = 0;
+                    prin = PV - accumPrin;
+                    PMT = intPmt + prin;
+                }
+                csvFile << i + 1 << separator
+                        << date(month , year , freq , i) << separator
+                        << PV - accumPrin << separator
+                        << prin << separator
+                        << round(intRate * 10000) / 10000 << separator
+                        << intPmt << separator
+                        << PMT << separator
+                        << outStanding << "\n";
             }
         }
         csvFile.close();
